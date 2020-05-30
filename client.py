@@ -1,3 +1,5 @@
+import os
+os.chdir('C:/Users/User/Desktop/Client-master/')
 import random
 from copy import copy
 
