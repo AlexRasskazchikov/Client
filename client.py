@@ -1,7 +1,3 @@
-import os
-import getpass
-os.chdir(f'C:/Users/{getpass.getuser()}/Desktop/Client-master/')
-import random
 from copy import copy
 
 import pygame
@@ -12,14 +8,14 @@ from Engine.Levels import Polygon, BackgroundObject
 from functions import vertical_gradient, inventory_add_object, show_info, show_fps
 from network import Network
 
-WIN_WIDTH = 1366
+WIN_WIDTH = 500
 WIN_HEIGHT = 768
 HALF_WIDTH = WIN_WIDTH // 2
 HALF_HEIGHT = WIN_HEIGHT // 2
 
 CAMERA_SLACK = 500
 ch = 50
-display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.DOUBLEBUF | pygame.FULLSCREEN)
+display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.DOUBLEBUF)
 pygame.display.set_caption("Deepworld Client")
 
 PACK = Player1
@@ -109,9 +105,7 @@ font.set_bold(True)
 def main(level):
     camera = Camera(complex_camera, level.total_level_width, level.total_level_height)
 
-    entities, platforms, background_tiles = level.render_files()
-    level.background_objects = list(map(lambda x: copy(x), level.background_objects)) + list(
-        map(lambda x: copy(x), background_tiles))
+    platforms = level.render_files()
     background_objects = list(map(lambda x: copy(x), level.background_objects))
 
     run = True
@@ -121,8 +115,9 @@ def main(level):
 
     clock = pygame.time.Clock()
     FramesClock = 1
-
+    x = 0
     while run:
+        new, rem = None, None
         clock.tick(300)
         FramesClock += 1
         display.fill((0, 0, 0))
@@ -132,16 +127,10 @@ def main(level):
         events = list(map(lambda x: x.type, pygame.event.get()))
         mouse_pressed = pygame.mouse.get_pressed()
         mouse = camera.reverse(pygame.mouse.get_pos())
-
-        p2 = n.send(player)
-
-        check_connection(player)
-        player.move(keys, platforms)
-
-        p1_img, p2_img = player.img.split(":"), p2.img.split(":")
-        p1_img, p2_img = PACK[p1_img[0]][int(p1_img[1])], PACK[p2_img[0]][int(p2_img[1])]
-        display.blit(p1_img, camera.apply_rect(player.rect))
-        display.blit(p2_img, camera.apply_rect(p2.rect))
+        player.platforms = platforms[:10]
+        p2 = n.send(
+            {"player": player})
+        platforms = p2["player"].platforms
 
         if pygame.QUIT in events:
             run = False
@@ -159,12 +148,8 @@ def main(level):
                     new.rect = rect
                     player.inventory[i].amount -= 1
 
-                    # Recognizing: BkgObject, or just a platform.
-                    if new.type == "BackgroundObject":
-                        background_objects.append(new)
-                    else:
+                    if new.type != "BackgroundObject":
                         platforms.append(new)
-                        entities.add(new)
 
                     # If material ended in player's inventory.
                     if player.inventory[i].amount <= 0:
@@ -180,9 +165,6 @@ def main(level):
                     rect = sprites[player.inventory[i].img].get_rect(topleft=new_coords)
                     pygame.draw.rect(display, (255, 255, 255), camera.apply_rect(rect), 2)
 
-        if player.check_hit(p2, p1_img, p2_img) is not None:
-            p2.hp -= player.damage
-
         # Cheking on platforms
         for p in platforms:
             if mouse_pressed[0] and p.rect.collidepoint(mouse):
@@ -190,23 +172,36 @@ def main(level):
                 if not player.hitted:
                     p.hp -= player.damage
                     player.hitted = True
-                    random.choice(p.sounds).play()
 
                     if p.hp <= 0:
-                        print("PLT:", p.name, p.type)
                         platforms.remove(p)
-                        entities.remove(p)
                         inventory_add_object(player, p)
 
             if not player.hitting:
                 player.hitted = False
 
+        check_connection(player)
+        player.move(keys, platforms)
+
+
+        p1_img, p2_img = player.img.split(":"), p2["player"].img.split(":")
+        p1_img, p2_img = PACK[p1_img[0]][int(p1_img[1])], PACK[p2_img[0]][int(p2_img[1])]
+        display.blit(p1_img, camera.apply_rect(player.rect))
+        display.blit(p2_img, camera.apply_rect(p2["player"].rect))
+
         # Drawing collidable objects.
-        for e in entities:
-            display.blit(sprites[e.img], camera.apply_rect(e.rect))
+        for p in platforms:
+            display.blit(sprites[p.img], camera.apply_rect(p.rect))
+
         """show_fps(display, clock, font, color=(255, 255, 255))"""
         show_info(display, "alex", font, color=(200, 200, 200), coords=(84, 7))
-        show_info(display, f"- London - {player.rect.x} east, {player.rect.y + player.rect.h} above", font, color=(114, 116, 51))
+        absolute_y = (700 - (player.rect.y + player.rect.h)) // 50
+        absolute_x = 85 - player.rect.x // 50
+        show_info(display,
+                  f"- Honeyfoot Woods - {f'{absolute_x} west' if absolute_x >= 0 else f'{-absolute_x} east'},"
+                  f" {f'{absolute_y} above' if absolute_y >= 0 else f'{-absolute_y} below'}",
+                  font,
+                  color=(114, 116, 51))
 
         player.update_frame(keys, FramesClock, PACK)
         player.draw_inventory(display, font, sprites, coords=(WIN_WIDTH // 3, 10))
@@ -218,6 +213,8 @@ def main(level):
         # Drawing Bar1
         draw_bar(display, int(player.hp), coords=(73, 30), color=(154, 26, 34))
         draw_bar(display, int(player.steam_amount), coords=(207, 30), color=(145, 153, 155))
+        if keys[pygame.K_F3]:
+            show_fps(display, clock, font, color=(255, 255, 255))
         pygame.display.update()
 
 
