@@ -1,8 +1,6 @@
 import os
-import getpass
-os.chdir(f'C:/Users/{getpass.getuser()}/Desktop/Client-master/')
 from copy import copy
-
+os.chdir(os.getcwd())
 import pygame
 from pygame.rect import Rect
 
@@ -11,14 +9,14 @@ from Engine.Levels import Polygon, BackgroundObject
 from functions import vertical_gradient, inventory_add_object, show_info, show_fps
 from network import Network
 
-WIN_WIDTH = 500
-WIN_HEIGHT = 600
+WIN_WIDTH = 1366
+WIN_HEIGHT = 768
 HALF_WIDTH = WIN_WIDTH // 2
 HALF_HEIGHT = WIN_HEIGHT // 2
 
 CAMERA_SLACK = 500
 ch = 50
-display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.DOUBLEBUF)
+display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.DOUBLEBUF | pygame.FULLSCREEN)
 pygame.display.set_caption("Deepworld Client")
 
 PACK = Player1
@@ -103,12 +101,14 @@ bar = pygame.Rect(80, 80, 130, 25)
 gradient = vertical_gradient((WIN_WIDTH, WIN_HEIGHT), (107, 116, 202), (211, 211, 211))
 font = pygame.font.Font(r'C:\Windows\Fonts\Arial.ttf', 15)
 font.set_bold(True)
+account_icon = pygame.transform.scale(pygame.image.load("DEEPWORLD 3.0/account.png"), (67, 61))
+icons = pygame.transform.scale(pygame.image.load("DEEPWORLD 3.0/icons.png"), (352, 62))
 
 
 def main(level):
     camera = Camera(complex_camera, level.total_level_width, level.total_level_height)
 
-    platforms = level.render_files()[:30]
+    platforms = level.render_files()
     background_objects = list(map(lambda x: copy(x), level.background_objects))
 
     run = True
@@ -118,9 +118,8 @@ def main(level):
 
     clock = pygame.time.Clock()
     FramesClock = 1
-    x = 0
+
     while run:
-        new, rem = None, None
         clock.tick(300)
         FramesClock += 1
         display.fill((0, 0, 0))
@@ -130,7 +129,6 @@ def main(level):
         events = list(map(lambda x: x.type, pygame.event.get()))
         mouse_pressed = pygame.mouse.get_pressed()
         mouse = camera.reverse(pygame.mouse.get_pos())
-
 
         if pygame.QUIT in events:
             run = False
@@ -183,10 +181,8 @@ def main(level):
         check_connection(player)
         player.move(keys, platforms)
 
-        player.platforms = platforms
         p2 = n.send(
             {"player": player})
-        platforms = p2["player"].platforms
         p1_img, p2_img = player.img.split(":"), p2["player"].img.split(":")
         p1_img, p2_img = PACK[p1_img[0]][int(p1_img[1])], PACK[p2_img[0]][int(p2_img[1])]
         display.blit(p1_img, camera.apply_rect(player.rect))
@@ -215,13 +211,16 @@ def main(level):
 
         # Drawing Bar1
         draw_bar(display, int(player.hp), coords=(73, 30), color=(154, 26, 34))
-        draw_bar(display, int(player.steam_amount), coords=(207, 30), color=(145, 153, 155))
+        draw_bar(display, int(player.steam_amount), coords=(222, 30), color=(145, 153, 155))
+
+        display.blit(icons, (947, 0))
+        display.blit(account_icon, (0, 0))
         if keys[pygame.K_F3]:
             show_fps(display, clock, font, color=(255, 255, 255))
         pygame.display.update()
 
 
-def draw_bar(display, value, color=(207, 205, 95), bkg=(130, 126, 59), min_point=20, coords=(600, 100), l=125):
+def draw_bar(display, value, color=(207, 205, 95), bkg=(130, 126, 59), min_point=20, coords=(600, 100), l=140):
     x, y = coords
     l = l - 25
     bar.x, bar.y = x + 12, y
