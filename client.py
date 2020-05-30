@@ -1,3 +1,6 @@
+import os
+import getpass
+os.chdir(f'C:/Users/{getpass.getuser()}/Desktop/Client-master/')
 import random
 from copy import copy
 
@@ -99,7 +102,8 @@ bar_ending_right = pygame.transform.flip(bar_ending_left, True, False)
 bar_background = pygame.Rect(80, 80, 130, 25)
 bar = pygame.Rect(80, 80, 130, 25)
 gradient = vertical_gradient((WIN_WIDTH, WIN_HEIGHT), (107, 116, 202), (211, 211, 211))
-font = pygame.font.Font(r'C:\Windows\Fonts\Arial.ttf', 25)
+font = pygame.font.Font(r'C:\Windows\Fonts\Arial.ttf', 15)
+font.set_bold(True)
 
 
 def main(level):
@@ -200,8 +204,9 @@ def main(level):
         # Drawing collidable objects.
         for e in entities:
             display.blit(sprites[e.img], camera.apply_rect(e.rect))
-        show_fps(display, clock, font, color=(255, 255, 255))
-        show_info(display, f"{player.rect.x}; {player.rect.y + player.rect.h}", font, color=(255, 255, 255))
+        """show_fps(display, clock, font, color=(255, 255, 255))"""
+        show_info(display, "alex", font, color=(200, 200, 200), coords=(84, 7))
+        show_info(display, f"- London - {player.rect.x} east, {player.rect.y + player.rect.h} above", font, color=(114, 116, 51))
 
         player.update_frame(keys, FramesClock, PACK)
         player.draw_inventory(display, font, sprites, coords=(WIN_WIDTH // 3, 10))
@@ -211,11 +216,12 @@ def main(level):
         display.blit(player_position, (map_coords_calculate(player.rect.x, level.total_level_width), 33))
 
         # Drawing Bar1
-        draw_bar(display, int(player.steam_amount), coords=(440, 70))
+        draw_bar(display, int(player.hp), coords=(73, 30), color=(154, 26, 34))
+        draw_bar(display, int(player.steam_amount), coords=(207, 30), color=(145, 153, 155))
         pygame.display.update()
 
 
-def draw_bar(display, value, color=(207, 205, 95), bkg=(130, 126, 59), min_point=20, coords=(600, 100), l=485):
+def draw_bar(display, value, color=(207, 205, 95), bkg=(130, 126, 59), min_point=20, coords=(600, 100), l=125):
     x, y = coords
     l = l - 25
     bar.x, bar.y = x + 12, y
