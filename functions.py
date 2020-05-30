@@ -111,7 +111,7 @@ def show_fps(display, clock, font, coords=(10, 10), color=(0, 0, 0)):
     display.blit(text, coords)
 
 
-def show_info(display, info, font, coords=(10, 40), color=(255, 255, 255)):
+def show_info(display, info, font, coords=(115, 7), color=(255, 255, 255)):
     """This function draws current fps on screen"""
     text = font.render(str(info), True, color)
     display.blit(text, coords)

@@ -8,6 +8,7 @@ from functions import collide
 class Player():
     def __init__(self, x, y, width, height):
         self.x, self.y = x, y
+        self.spawn = (x, y)
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
@@ -90,7 +91,7 @@ class Player():
             self.hit_animation_speed = 5
 
         if "up" in self.controls and keys[self.controls["up"]]:
-            if self.steam_amount > 0:
+            if self.steam_amount > 0 and self.rect.y > 0:
                 self.yvel = -3
                 self.steam_amount -= 0.5
         else:
@@ -112,6 +113,9 @@ class Player():
         self.rect.top += self.yvel
         self.onGround = False
         collide(self, 0, self.yvel, platforms)
+        if self.rect.y > 2000:
+            self.yvel, self.xvel = 0, 0
+            self.rect.x, self.rect.y = self.spawn
 
     def draw_inventory(self, display, font, sprites, border_color=(50, 50, 50), border_thicness=1, size=64,
                        coords=(600, 10)):

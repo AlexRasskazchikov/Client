@@ -23,9 +23,7 @@ class Level:
         self.total_level_height = len(self.map) * cell_height
 
     def render_files(self):
-        entities = pygame.sprite.Group()
         platforms = []
-        background_tiles = []
         x = y = 0
         for row in self.map:
             for col in row:
@@ -34,22 +32,21 @@ class Level:
                                          coords=(x, y),
                                          name=col, act=True, hp=10, type="Platform")
                     p.rect = pygame.Rect(x, y, cell_height, cell_height)
-                    if col.isupper():
-                        platforms += [p]
-                        entities.add(p)
+                    platforms += [p]
                 x += cell_height
             y += cell_height
             x = 0
-        return entities, platforms, background_tiles
+        return platforms
 
     def add_background_object(self, *other):
         self.background_objects += other
 
+    def __eq__(self, other):
+        return self.map == other.map
+
 
 class BackgroundObject(Entity):
-    def __init__(self, image, coords, size=None, name="Unknown", hp=100,
-                 sounds=[pygame.mixer.Sound("DEEPWORLD 3.0/m1.wav"),
-                         pygame.mixer.Sound("DEEPWORLD 3.0/m2.wav")], act=True, amount=1,
+    def __init__(self, image, coords, size=None, name="Unknown", hp=100, act=True, amount=1,
                  type="BackgroundObject"):
         super().__init__()
         self.name = name
@@ -61,9 +58,11 @@ class BackgroundObject(Entity):
         self.amount = amount
         self.type = type
         self.hp, self.start_hp = hp, hp
-        self.sounds = sounds
 
         self.act = act
+
+    def __eq__(self, other):
+        return self.name == other.name and self.coords == other.coords
 
     def move(self, deltax, deltay):
         self.coords = (self.coords[0] + deltax, self.coords[1] + deltay)
@@ -81,17 +80,6 @@ class BackgroundObject(Entity):
 
     def set_active(self, bool):
         self.act = bool
-
-
-cloth = [r"Assets/sounds/cloth/cloth1.mp3",
-         r"Assets/sounds/cloth/cloth2.mp3",
-         r"Assets/sounds/cloth/cloth3.mp3",
-         r"Assets/sounds/cloth/cloth4.mp3"]
-
-earth_sounds = [r"Assets/Sounds/grass/grass1.mp3",
-                r"Assets/Sounds/grass/grass2.mp3",
-                r"Assets/Sounds/grass/grass3.mp3",
-                r"Assets/Sounds/grass/grass4.mp3"]
 
 
 def Plain():

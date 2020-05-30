@@ -10,7 +10,7 @@ class AnimationPack:
         self.pack = {}
         self.meta = {}
         self.animation_count = {}
-        self.size = (200, 100)
+        self.size = (150, 100)
 
     def set_animation_count(self, dct):
         """This function sets number of same animations."""

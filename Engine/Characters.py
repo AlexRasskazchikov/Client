@@ -4,7 +4,6 @@ display = pygame.display.set_mode((1200, 600))
 from Engine.Player import *
 from Engine.Animations import AnimationPack
 
-
 """Default Player"""
 Player1 = AnimationPack("Assets/Hero")
 Player1.add_animation_sets("run-right", "idle-right", "hit1-right", "hit2-right", "hit3-right")
