@@ -9,7 +9,7 @@ from functions import vertical_gradient, inventory_add_object, show_info, show_f
 from network import Network
 
 WIN_WIDTH = 500
-WIN_HEIGHT = 768
+WIN_HEIGHT = 600
 HALF_WIDTH = WIN_WIDTH // 2
 HALF_HEIGHT = WIN_HEIGHT // 2
 
@@ -105,7 +105,7 @@ font.set_bold(True)
 def main(level):
     camera = Camera(complex_camera, level.total_level_width, level.total_level_height)
 
-    platforms = level.render_files()
+    platforms = level.render_files()[:30]
     background_objects = list(map(lambda x: copy(x), level.background_objects))
 
     run = True
@@ -127,10 +127,7 @@ def main(level):
         events = list(map(lambda x: x.type, pygame.event.get()))
         mouse_pressed = pygame.mouse.get_pressed()
         mouse = camera.reverse(pygame.mouse.get_pos())
-        player.platforms = platforms[:10]
-        p2 = n.send(
-            {"player": player})
-        platforms = p2["player"].platforms
+
 
         if pygame.QUIT in events:
             run = False
@@ -183,7 +180,10 @@ def main(level):
         check_connection(player)
         player.move(keys, platforms)
 
-
+        player.platforms = platforms
+        p2 = n.send(
+            {"player": player})
+        platforms = p2["player"].platforms
         p1_img, p2_img = player.img.split(":"), p2["player"].img.split(":")
         p1_img, p2_img = PACK[p1_img[0]][int(p1_img[1])], PACK[p2_img[0]][int(p2_img[1])]
         display.blit(p1_img, camera.apply_rect(player.rect))

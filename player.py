@@ -38,6 +38,7 @@ class Player():
                                    pygame.K_4,
                                    pygame.K_5]
         self.steam_amount = 100
+        self.platforms = []
 
     def update_frame(self, keys, FramesClock, PACK):
         """Animates player"""
