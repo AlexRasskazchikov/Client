@@ -1,3 +1,6 @@
+import os
+import getpass
+os.chdir(f'C:/Users/{getpass.getuser()}/Desktop/Client-master/')
 from copy import copy
 
 import pygame
