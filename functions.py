@@ -66,10 +66,12 @@ def collide(player, xvel, yvel, platforms):
             if xvel > 0:
                 # Colliding Right
                 player.rect.right = p.rect.left
+                player.yvel -= 1
 
             if xvel < 0:
                 # Colliding Left.
                 player.rect.left = p.rect.right
+                player.yvel -= 1
 
             if yvel > 0:
                 # Staying on ground.

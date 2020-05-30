@@ -1,4 +1,6 @@
-import pickle
+import random
+from copy import copy
+
 import random
 from copy import copy
 
@@ -6,7 +8,7 @@ import pygame
 
 from Engine import show_fps, show_info, bake_light
 from Engine.Characters import player1
-from Engine.Levels import Plain, BackgroundObject, Polygon
+from Engine.Levels import BackgroundObject, Polygon
 
 WIN_WIDTH = 1366
 WIN_HEIGHT = 768
@@ -74,7 +76,6 @@ def run(level, display):
     level.background_objects = list(map(lambda x: copy(x), level.background_objects)) + list(
         map(lambda x: copy(x), background_tiles))
     background_objects = list(map(lambda x: copy(x), level.background_objects))
-
 
     entities.add(player)
     entities.add(player2)
@@ -220,10 +221,6 @@ def run(level, display):
 
         # Exit Game.
         if keys[pygame.K_ESCAPE]:
-            load_dict = {"Game-Objects": [entities, platforms, background_tiles],
-                         "Background-Objects": background_objects,
-                         "Camera": camera}
-            """Saving code"""
             raise SystemExit("Escape")
 
         # Go to next level.
@@ -272,7 +269,6 @@ def map_coords_calculate(player_x, level_width=2000, map_width=485, map_delta_x=
 
 pygame.init()
 from pygame.locals import *
-
 
 display = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), DOUBLEBUF | FULLSCREEN)
 portal = pygame.mixer.Sound(r"DEEPWORLD 3.0/portal.wav")

@@ -145,22 +145,10 @@ def Plain():
         "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP"
     ])
 
-    ground = pygame.transform.scale(pygame.image.load(r"Assets/Tiles/Tile_02.bmp"), (cell_height, cell_height))
-    right = pygame.transform.scale(pygame.image.load(r"Assets/Tiles/Tile_03.bmp"), (cell_height, cell_height))
-    left = pygame.transform.scale(pygame.image.load(r"Assets/Tiles/Tile_01.bmp"), (cell_height, cell_height))
-    earth = pygame.transform.scale(pygame.image.load(r"Assets/Tiles/Tile_14.bmp"), (cell_height, cell_height))
-
-    tile1 = pygame.Surface((cell_height, cell_height))
-    tile1.fill((92, 43, 1))
-
-    tile2 = pygame.Surface((cell_height, cell_height))
-    tile2.fill((54, 8, 0))
-
     Plain.materials = {"G": "ground",
                        "L": "left",
                        "R": "right",
                        "P": "earth"}
-    Plain.material_dict = {"ground": ground}
 
     Plain.background = (105, 169, 204)
     Plain.spawn = (1000, 900)

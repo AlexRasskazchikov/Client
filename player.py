@@ -14,8 +14,9 @@ class Player():
         self.vel = 3
         self.damage = 10
         self.inventory = []
+        self.hp = 100
 
-        self.speed = 10
+        self.speed = 30
         self.anim_count = 0
         self.animation_speed = 5
         self.img = "idle-right:0"
@@ -24,15 +25,18 @@ class Player():
         self.direction = "right"
         self.xvel, self.yvel = 0, 0
         self.onGround = False
-        self.jump = 10
+        self.jump = 15
+        self.jumped = False
 
-        self.controls = {"up": pygame.K_UP, "right": pygame.K_RIGHT,
-                         "left": pygame.K_LEFT, "hit": pygame.K_SPACE}
+        self.controls = {"up": pygame.K_w, "right": pygame.K_d,
+                         "left": pygame.K_a, "hit": pygame.K_SPACE,
+                         "speedup": pygame.K_LSHIFT}
         self.inventory_controls = [pygame.K_1,
                                    pygame.K_2,
                                    pygame.K_3,
                                    pygame.K_4,
                                    pygame.K_5]
+        self.steam_amount = 100
 
     def update_frame(self, keys, FramesClock, PACK):
         """Animates player"""
@@ -69,40 +73,45 @@ class Player():
 
     def move(self, keys, platforms):
         """Moves player"""
-        if not self.hitting:
 
-            for i in range(len(self.inventory_controls)):
-                key = self.inventory_controls[i]
-                if keys[key]:
-                    for elem in self.inventory:
-                        elem.choosen = False
-                    if i < len(self.inventory):
-                        self.inventory[i].choosen = True
+        for i in range(len(self.inventory_controls)):
+            key = self.inventory_controls[i]
+            if keys[key]:
+                for elem in self.inventory:
+                    elem.choosen = False
+                if i < len(self.inventory):
+                    self.inventory[i].choosen = True
 
-            if "speedup" in self.controls and keys[self.controls["speedup"]]:
-                self.speed = 10
-                self.hit_animation_speed = 3
-            else:
-                self.speed = 7
-                self.hit_animation_speed = 5
-            if "up" in self.controls and keys[self.controls["up"]]:
-                if self.onGround:
-                    self.yvel -= self.jump
-            if "left" in self.controls and keys[self.controls["left"]]:
-                self.xvel = -self.speed
-            if "right" in self.controls and keys[self.controls["right"]]:
-                self.xvel = self.speed
-            if not self.onGround:
-                self.yvel += 0.5
-                if self.yvel > 100:
-                    self.yvel = 100
-            if not (keys[self.controls["left"]] or keys[self.controls["right"]]):
-                self.xvel = 0
-            self.rect.left += self.xvel
-            collide(self, self.xvel, 0, platforms)
-            self.rect.top += self.yvel
-            self.onGround = False
-            collide(self, 0, self.yvel, platforms)
+        if "speedup" in self.controls and keys[self.controls["speedup"]]:
+            self.speed = 10
+            self.hit_animation_speed = 3
+        else:
+            self.speed = 7
+            self.hit_animation_speed = 5
+
+        if "up" in self.controls and keys[self.controls["up"]]:
+            if self.steam_amount > 0:
+                self.yvel = -3
+                self.steam_amount -= 0.5
+        else:
+            if self.steam_amount < 100:
+                self.steam_amount += 0.3
+
+        if "left" in self.controls and keys[self.controls["left"]]:
+            self.xvel = -self.speed
+        if "right" in self.controls and keys[self.controls["right"]]:
+            self.xvel = self.speed
+        if not self.onGround:
+            self.yvel += 0.5
+            if self.yvel > 100:
+                self.yvel = 100
+        if not (keys[self.controls["left"]] or keys[self.controls["right"]]):
+            self.xvel = 0
+        self.rect.left += self.xvel
+        collide(self, self.xvel, 0, platforms)
+        self.rect.top += self.yvel
+        self.onGround = False
+        collide(self, 0, self.yvel, platforms)
 
     def draw_inventory(self, display, font, sprites, border_color=(50, 50, 50), border_thicness=1, size=64,
                        coords=(600, 10)):
@@ -132,3 +141,20 @@ class Player():
                 pygame.draw.rect(display, border_color, (x, y, size, size), border_thicness)
                 text = font.render(str(o.amount), True, (255, 255, 255))
                 display.blit(text, (x + half, y + half))
+
+    def check_hit(self, object, sprite1, sprite2):
+        if self.collides(object, sprite1, sprite2) and self.hitting:
+            if not self.hitted:
+                self.hitted = True
+                return "Hitted!"
+        if not self.hitting:
+            self.hitted = False
+
+    def collides(self, other, sprite1, sprite2):
+        """Perfect Pixel Collision Checker"""
+        offset_x, offset_y = (other.rect.left - self.rect.left), (other.rect.top - self.rect.top)
+        if self.get_mask(sprite1).overlap(other.get_mask(sprite2), (offset_x, offset_y)) is not None:
+            return True
+
+    def get_mask(self, image):
+        return pygame.mask.from_surface(image)
